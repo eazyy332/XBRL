@@ -1,6 +1,7 @@
 import os
 import zipfile
 import logging
+import shutil
 from pathlib import Path
 from taxonomy_dependency_manager import EBATaxonomyDependencyManager
 
@@ -62,9 +63,29 @@ class TaxonomyProcessor:
             # FIXED: Use SHORT paths to avoid Windows 260 character limit
             arch_suffix = "a1" if architecture_version == "arch_1_0" else "a2"
             extraction_dir = os.path.join("uploads", f"tax_{arch_suffix}")
-            
-            # Ensure directory exists with SHORT path
+
+            # Validate and prepare extraction directory
+            if os.path.exists(extraction_dir):
+                if not os.path.isdir(extraction_dir) or not os.access(extraction_dir, os.W_OK | os.R_OK):
+                    backup_path = f"{extraction_dir}_old"
+                    try:
+                        os.rename(extraction_dir, backup_path)
+                        logger.warning(f"📝 Moved existing path {extraction_dir} to {backup_path}")
+                    except Exception:
+                        logger.warning(f"⚠️ Could not rename {extraction_dir}, attempting removal")
+                        try:
+                            if os.path.isdir(extraction_dir):
+                                shutil.rmtree(extraction_dir)
+                            else:
+                                os.remove(extraction_dir)
+                        except Exception as cleanup_error:
+                            logger.error(f"❌ Unable to prepare extraction dir {extraction_dir}: {str(cleanup_error)}")
+                            return None
+
             os.makedirs(extraction_dir, exist_ok=True)
+            if not os.access(extraction_dir, os.W_OK):
+                logger.error(f"❌ Extraction directory not writable: {extraction_dir}")
+                return None
             logger.info(f"📁 Created SHORT extraction directory: {extraction_dir}")
             
             logger.info(f"📦 Extracting taxonomy ZIP: {zip_path} for {architecture_version}")
@@ -98,7 +119,7 @@ class TaxonomyProcessor:
             logger.error(f"❌ Invalid ZIP file: {str(e)}")
             return None
         except PermissionError as e:
-            logger.error(f"❌ Permission denied extracting to {extraction_dir}: {str(e)}")
+            logger.error(f"❌ Permission denied accessing {extraction_dir}: {str(e)}")
             return None
         except Exception as e:
             logger.error(f"❌ Failed to extract taxonomy ZIP: {str(e)}")
