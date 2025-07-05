@@ -44,11 +44,15 @@ class DMPValidator:
                     'error': f'Invalid concept_resolutions type: {type(concept_resolutions)}. Expected dict.'
                 }
             
+            total_fact_instances = sum(
+                len(v) if isinstance(v, list) else 1 for v in facts.values()
+            )
+
             validation_result = {
                 'method': 'pure_dmp_database',
                 'status': 'completed',
                 'timestamp': concept_resolutions.get('timestamp'),
-                'total_facts': len(facts),
+                'total_facts': total_fact_instances,
                 'validation_summary': {
                     'valid_facts': 0,
                     'invalid_facts': 0,
@@ -72,28 +76,35 @@ class DMPValidator:
                 if isinstance(detail, dict) and detail.get('resolved', False)
             }
             
-            # Validate each fact
+            # Validate each fact, handling lists of fact instances
             for fact_name, fact_data in facts.items():
-                fact_validation = self._validate_single_fact(
-                    fact_name, fact_data, resolved_concepts.get(fact_name)
-                )
-                
-                validation_result['fact_validations'].append(fact_validation)
-                
-                # Update counters
-                status = fact_validation['validation_status']
-                if status == 'valid':
-                    validation_result['validation_summary']['valid_facts'] += 1
-                elif status == 'invalid':
-                    validation_result['validation_summary']['invalid_facts'] += 1
-                elif status == 'warning':
-                    validation_result['validation_summary']['warning_facts'] += 1
-                else:  # unresolved
-                    validation_result['validation_summary']['unresolved_facts'] += 1
-                
-                # Collect data quality issues
-                if fact_validation.get('issues'):
-                    validation_result['data_quality_issues'].extend(fact_validation['issues'])
+                fact_items = fact_data if isinstance(fact_data, list) else [fact_data]
+
+                for single_data in fact_items:
+                    fact_validation = self._validate_single_fact(
+                        fact_name,
+                        single_data,
+                        resolved_concepts.get(fact_name),
+                    )
+
+                    validation_result['fact_validations'].append(fact_validation)
+
+                    # Update counters per fact instance
+                    status = fact_validation['validation_status']
+                    if status == 'valid':
+                        validation_result['validation_summary']['valid_facts'] += 1
+                    elif status == 'invalid':
+                        validation_result['validation_summary']['invalid_facts'] += 1
+                    elif status == 'warning':
+                        validation_result['validation_summary']['warning_facts'] += 1
+                    else:  # unresolved
+                        validation_result['validation_summary']['unresolved_facts'] += 1
+
+                    # Collect data quality issues
+                    if fact_validation.get('issues'):
+                        validation_result['data_quality_issues'].extend(
+                            fact_validation['issues']
+                        )
             
             # Calculate validation metrics
             self._calculate_validation_metrics(validation_result)
