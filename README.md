@@ -19,7 +19,10 @@ cd <YOUR_PROJECT_NAME>
 # 2. Installeer dependencies
 npm install
 
-# 3. Start de development server
+# 3. Installeer backend packages
+pip install -r requirements.txt
+
+# 4. Start de development server
 npm run dev
 ```
 
@@ -77,8 +80,13 @@ src/
 ### Backend Development
 Zorg dat je Python backend draait op poort 5000 met endpoints:
 - `GET /health` - Health check
-- `POST /generate-xbrl` - XBRL generatie  
+- `POST /generate-xbrl` - XBRL generatie
 - `POST /validate` - XBRL validatie
+
+Installeer de benodigde Python packages met:
+```bash
+pip install -r requirements.txt
+```
 
 ### Frontend Development
 ```bash
