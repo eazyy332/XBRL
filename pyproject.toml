@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xbrlval"
+version = "0.1.0"
+description = "Professional-grade XBRL validation tool"
+readme = "README.md"
+authors = [{name = "Your Team"}]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+xbrlval = "xbrlval.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["xbrlval*"]
