@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:ex="http://example.com/taxonomy" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <link:schemaRef xlink:type="simple" xlink:href="example.xsd"/>
+  <xbrli:context id="C1">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://example.com/entity">123456789</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:unit id="U1">
+    <xbrli:measure>iso4217:USD</xbrli:measure>
+  </xbrli:unit>
+  <ex:Assets contextRef="C1" unitRef="U1" decimals="0">100</ex:Assets>
+  <ex:Liabilities contextRef="C1" unitRef="U1" decimals="0">40</ex:Liabilities>
+  <ex:Equity contextRef="C1" unitRef="U1" decimals="0">60</ex:Equity>
+</xbrli:xbrl>
